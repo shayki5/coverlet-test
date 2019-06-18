@@ -4,13 +4,13 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
+- master2
 
 pool:
   vmImage: 'windows-latest'
 
 steps:
-- task: DotNetCoreCLI@2
+- task: DotNetCoreCLI@1
   inputs:
     command: 'restore'
     projects: '**/PrimeService.Tests.csproj'
