@@ -6,6 +6,10 @@ pool:
 jobs:
 - job: buildAndTestJob
   steps:
+    - task: UseDotNet@2
+      inputs:
+        packageType: 'sdk'
+        useGlobalJson: true
     - task: DotNetCoreCLI@2
       displayName: dotnet restore
       inputs:
@@ -42,6 +46,10 @@ jobs:
 
 - job: packAndPushJob
   steps:
+  - task: UseDotNet@2
+    inputs:
+    packageType: 'sdk'
+    version: '2.0.2'
   - task: DownloadBuildArtifacts@0
     displayName: download build artifacts
     inputs:
