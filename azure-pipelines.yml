@@ -48,8 +48,8 @@ jobs:
   steps:
   - task: UseDotNet@2
     inputs:
-    packageType: 'sdk'
-    version: '2.0.2'
+      packageType: 'sdk'
+      version: '2.0.2'
   - task: DownloadBuildArtifacts@0
     displayName: download build artifacts
     inputs:
