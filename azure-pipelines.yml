@@ -1,0 +1,78 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+- job: buildAndTestJob
+ steps:
+  - task: DotNetCoreCLI@2
+    displayName: dotnet restore
+    inputs:
+      command: restore
+      vstsFeed:  $(vstsFeed)
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet build'
+    inputs:
+      arguments: '--configuration ${{ parameters.buildConfiguration }}'
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet test'
+    inputs:
+      command: test
+      arguments: '--configuration ${{ parameters.buildConfiguration }}'
+  - task: CopyFiles@2
+    displayName: copy bin files
+    inputs:
+      sourceFolder: '$(Build.SourcesDirectory)'
+      contents: '**/bin/**/*'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+  - task: CopyFiles@2
+    displayName: copy obj files
+    inputs:
+      sourceFolder: '$(Build.SourcesDirectory)'
+      contents: '**/obj/**/*'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+  - task: PublishBuildArtifacts@1
+    displayName: publish build artifacts
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: buildeffect
+      publishLocation: 'Container'
+
+
+-job: packAndPushJob
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: download build artifacts
+    inputs:
+      buildType: 'current'
+      downloadType: 'single'
+      artifactName: 'buildeffect'
+      downloadPath: '$(Build.ArtifactStagingDirectory)'
+  - task: CopyFiles@2
+    displayName: copy files to source directory
+    inputs:
+      sourceFolder: '$(Build.ArtifactStagingDirectory)/buildeffect'
+      contents: '**/*'
+      TargetFolder: '$(Build.SourcesDirectory)'
+      allowPackageConflicts: true
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet pack'
+    inputs:
+      arguments: '--no-restore'
+      nobuild: true
+      command: pack
+      projects: '$(Build.SourcesDirectory)'
+      publishWebProjects: true
+      publishVstsFeed: $(vstsFeed)
+      includeNuGetOrg: true
+  - task: NuGetCommand@2
+    displayName: 'nuGet push'
+    inputs:
+      command: push
+      projects: '$(Build.SourcesDirectory)'
+      publishVstsFeed: $(vstsFeed)
+      allowPackageConflicts: true
