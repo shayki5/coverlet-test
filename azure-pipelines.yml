@@ -1,7 +1,7 @@
 
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'windows-latest'
 
 jobs:
 - job: buildAndTestJob
@@ -14,12 +14,12 @@ jobs:
     - task: DotNetCoreCLI@2
       displayName: 'dotnet build'
       inputs:
-        arguments: '--configuration ${{ parameters.buildConfiguration }}'
+        arguments: '--configuration release'
     - task: DotNetCoreCLI@2
       displayName: 'dotnet test'
       inputs:
         command: test
-        arguments: '--configuration ${{ parameters.buildConfiguration }}'
+        arguments: '--configuration release'
     - task: CopyFiles@2
       displayName: copy bin files
       inputs:
